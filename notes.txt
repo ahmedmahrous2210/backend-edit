@@ -1,0 +1,24 @@
+// General Comments for the given code: 
+1- You have a function called
+public function __addInBOBPlayer($reqData, $returnData) ...,
+It does not follow the template, I think the first parameter is missing ..... Please check
+I did not include it in the switch case till you tell me that  it should be corrected
+
+2- This function is defined as Public
+public function __apieditABEPlayerUser ($iboreseller, $reqData, $returnData)
+Should it be private so no one can access from outside?
+Please check
+By the way, I include it in the switch case
+
+3- This function is Public
+public function __apiEditBOBPlayerUser($bobPlayer, $reqData, $returnData)
+Should it be private so no one can access from outside?
+Please check
+By the way, I include it in the switch case
+
+Bellow is the generic code for a function that replaces all the 17 functions in your code
+
+
+I called it __apiedit_App_General
+I added a new parameter called $App_Name which should be like your 17 functions' name as     __apieditBOBProTV, __apieditIBOXXPlayer, ......
+Once you pass the function name to this function, it will select the correct parameter according to switch case and implement the same code.

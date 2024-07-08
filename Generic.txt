@@ -1,0 +1,95 @@
+
+private function __apiedit_App_General($App_Name, $App_Device_General,$reqData, $returnData)
+    {
+		// Switch the parameter $App_Name ..........
+		$Device_Code "";
+		switch ($App_Name) {
+		  case "__apieditBOBProTV":
+			$Device_Code = "BOBPROTV";
+			break;
+		  case "__apieditIBOXXPlayer":
+		  case "__apieditFamilyPlayer":
+			$Device_Code = "FAMILYPLAYER";
+			break;
+		  case "__apieditIBOSSPlayer":
+			$Device_Code = "IBOSSPLAYER";
+			break;
+		  case "__apieditKing4KPlayer":
+			$Device_Code = "KING4KPLAYER";
+			break;
+		  case "__apiEditBOBPlayerUser":
+			$Device_Code = "BOBPLAYER";
+			break;	
+		  case "__apieditHushPlay":
+			$Device_Code = "HUSHPLAY";
+			break;	
+		  case "__apieditABEPlayerUser":
+			$Device_Code = "ABEPLAYERTV";
+			break;
+		  //	
+		  case "__apieditVirginiaUser":
+			$Device_Code = "VIRGINIA";
+			break;		
+		  case "__apieditIBOAppUser":
+			$Device_Code = "IBOAPP";
+			break;
+		  case "__apieditMacPLayer":
+			$Device_Code = "MACPLAYER";
+			break;		
+		  case "__apieditKTNPlayer":
+			$Device_Code = "KTNPLAYER";
+			break;	
+		  case "__apieditALLPlayer":
+			$Device_Code = "ALLPLAYER";
+			break;	
+		  case "__apieditFlixNet":
+			$Device_Code = "FLIXNET";
+			break;		
+		  case "__apieditDuplex":
+			$Device_Code = "DUPLEX";
+			break;		
+		  case "__apieditIBOSOL":
+			$Device_Code = "IBOSOL";
+			break;	
+		  case "__apieditIBOStb":
+			$Device_Code = "IBOSTB";
+			break;					
+		  default:
+			$Device_Code = "WrongCode";
+		}
+				
+		
+		// =========================================
+	
+        if (!empty($reqData['requestData']['appType'])) {
+            $App_Device_General->app_type = $reqData['requestData']['appType'];
+       }
+       if (!empty($reqData['requestData']['email'])) {
+           $App_Device_General->email = $reqData['requestData']['email'];
+       }
+       $App_Device_General->expire_date = $this->__setExpiryDate($reqData['requestData']['isTrail'],  $App_Device_General->expire_date, $Device_Code);
+       $App_Device_General->reseller_id = $reqData['requestData']['updatedBy'];
+       if ($reqData['requestData']['isTrail'] !==  $App_Device_General->is_trial) {
+           $App_Device_General->is_trial = $reqData['requestData']['isTrail'] == 1 ? 0 : ($reqData['requestData']['isTrail'] == 2 ? 2 : 2);
+       }
+       $creditPoint = $this->__getCreditPointVal($reqData['requestData']['isTrail']);
+       //check for credit acount balance
+       $resellerData = IBOReseller::find($reqData['requestData']['updatedBy']);
+       $save_device = AppActivationService::saveDeviceActivation($Device_Code,  $App_Device_General);
+       if ($save_device != 0) {
+           //update here trans data
+           $remarks = $reqData["requestData"]["activationRemarks"] ?? "";
+           $this->__addActivationTranLogs(["activation_remarks" => $remarks, "expiry_date" =>  $App_Device_General->expire_date, "reseller_id" =>  $App_Device_General->reseller_id, "user_id" =>  $App_Device_General->id, "mac_address" =>  $App_Device_General->mac_address, "module" => $reqData['module'], "credit_point" => $creditPoint, "activated_from" => "MULTIAPP"]);
+           //end updating trans data
+           $returnData["status"] = true;
+           $returnData["msg"] = "User updated successfully!";
+           $returnData["statusCode"] = "000000";
+           $returnData["data"] = ["MASAPlayer" =>  $App_Device_General];
+           $returnData["httpCode"] = "200";
+       } else {
+           $returnData["msg"] = "User could not be updated this moment, Please try after sometime.!";
+           $returnData["statusCode"] = "C20012";
+           $returnData["httpCode"] = "501";
+       }
+       return $returnData;
+    }
